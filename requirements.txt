@@ -1,0 +1,12 @@
+Flask==2.0.3
+Flask-WTF==1.0.1  # For form handling if using WTForms
+Flask-SQLAlchemy==2.5.1  # If using SQLAlchemy for database management
+Jinja2==3.0.3  # For templating
+Werkzeug==2.0.3  # Flask's internal server functionality
+itsdangerous==2.0.1  # Used for security features like sessions
+click==8.0.4  # Command-line utilities
+MarkupSafe==2.0.1  # For safe handling of strings in Jinja templates
+
+# If using a specific database, include the respective library
+psycopg2-binary==2.9.3  # If using PostgreSQL
+PyMySQL==1.0.2  # If using MySQL
