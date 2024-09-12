@@ -159,4 +159,4 @@ def expense_chart():
     return render_template('expense_chart.html', chart_url=url_for('static', filename='expense_chart.png'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
