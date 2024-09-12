@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 from datetime import datetime
-import os
 from werkzeug.security import generate_password_hash, check_password_hash
-import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -89,7 +87,7 @@ def login():
 
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     session.clear()
     flash('You have been logged out.', 'info')
@@ -107,6 +105,17 @@ def add_expense():
         date = request.form['date']
         time = request.form['time']
         user_id = session['user_id']
+
+        # Check for missing or invalid data
+        if not expense or not category or not amount or not date or not time:
+            flash('Please fill in all fields.', 'danger')
+            return redirect(url_for('add_expense'))
+
+        try:
+            amount = float(amount)
+        except ValueError:
+            flash('Amount should be a valid number.', 'danger')
+            return redirect(url_for('add_expense'))
 
         conn = get_db_connection()
         conn.execute('INSERT INTO expenses (user_id, expense, category, amount, date, time) VALUES (?, ?, ?, ?, ?, ?)',
@@ -132,31 +141,5 @@ def view_expenses():
 
     return render_template('view_expenses.html', expenses=expenses, total_amount=total_amount or 0)
 
-@app.route('/expense_chart')
-def expense_chart():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    conn = get_db_connection()
-    user_id = session['user_id']
-    expenses = conn.execute('SELECT category, SUM(amount) as total FROM expenses WHERE user_id = ? GROUP BY category',
-                            (user_id,)).fetchall()
-    conn.close()
-
-    categories = [expense['category'] for expense in expenses]
-    totals = [expense['total'] for expense in expenses]
-
-    plt.figure(figsize=(6, 6))
-    plt.pie(totals, labels=categories, autopct='%1.1f%%')
-    plt.title('Expenses by Category')
-
-    if not os.path.exists('static'):
-        os.makedirs('static')
-
-    plt.savefig('static/expense_chart.png')
-    plt.close()
-
-    return render_template('expense_chart.html', chart_url=url_for('static', filename='expense_chart.png'))
-
 if __name__ == '__main__':
-    app.run(debug=True,host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
